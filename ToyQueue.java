@@ -16,7 +16,7 @@ public class ToyQueue {
     }
 
     public void put(Toy toy) {
-        toyQueue.offer(toy);
+        toyQueue.add(toy);
     }
 
     public Toy get() {
@@ -24,6 +24,9 @@ public class ToyQueue {
         int totalFrequency = 0;
         for (Toy toy : toys) {
             totalFrequency += toy.getFrequency();
+        }
+        if (totalFrequency <= 0) {
+            return null; // Или выбросьте исключение, если это необходимо
         }
         int randomValue = random.nextInt(totalFrequency);
         for (Toy toy : toys) {
@@ -35,15 +38,24 @@ public class ToyQueue {
         return null;
     }
 
-    public void writeToFile(String filename) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
-            while (!toyQueue.isEmpty()) {
-                Toy toy = toyQueue.poll();
-                writer.write(toy.getId() + "," + toy.getName() + "," + toy.getFrequency());
-                writer.newLine();
-            }
+    public void writeToFile(String filename, Toy toy) {
+        // Проверка на null
+        if (toy == null) {
+            System.err.println("Error: Toy object is null. Unable to write to file.");
+            return;
+        }
+
+        // Использование метода try-with-resources для автоматического закрытия ресурса
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename, true))) { // добавлен режим append
+            // Форматирование строки для записи
+            String record = String.format("Id: %s, Название: %s, Частоту: %d \n", toy.getId(), toy.getName(),
+                    toy.getFrequency());
+
+            // Запись записи в файл
+            writer.write(record);
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Error writing to file: " + e.getMessage());
+            e.printStackTrace(); // Логирование ошибки (можно заменить на логирование с помощью логгера)
         }
     }
 }
